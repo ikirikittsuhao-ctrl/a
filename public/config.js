@@ -1,0 +1,2 @@
+window.SCHAT_SUPABASE_URL="";
+window.SCHAT_SUPABASE_ANON_KEY="";
