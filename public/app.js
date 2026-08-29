@@ -31,8 +31,8 @@ async function api(url, options={}){
   Supabase JS is intentionally loaded from the official CDN.
   Set your Supabase project values below.
 */
-const SUPABASE_URL=window.SCHAT_SUPABASE_URL||"";
-const SUPABASE_ANON_KEY=window.SCHAT_SUPABASE_ANON_KEY||"";
+const SUPABASE_URL=window.SCHAT_SUPABASE_URL||"https://wnrzdqskqgepiwawfnbr.supabase.co";
+const SUPABASE_ANON_KEY=window.SCHAT_SUPABASE_ANON_KEY||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducnpkcXNrcWdlcGl3YXdmbmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0Mzg4MzIsImV4cCI6MjEwMDAxNDgzMn0.hf7inGptEMeOZV1q4Ieo82DMDsC5JjcCy72I98w7-OE";
 
 async function init(){
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
