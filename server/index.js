@@ -44,14 +44,25 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      scriptSrc: [
+        "'self'",
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net"
+      ],
       styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"],
       fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "data:"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", ORIGIN, "wss:", "https:"],
-      objectSrc: ["'none"],
+      connectSrc: [
+        "'self'",
+        ORIGIN,
+        "https://*.supabase.co",
+        "wss://*.supabase.co",
+        "wss:",
+        "https:"
+      ],
+      objectSrc: ["'none'"],
       baseUri: ["'self'"],
-      frameAncestors: ["'none"]
+      frameAncestors: ["'none'"]
     }
   },
   crossOriginEmbedderPolicy: false
@@ -105,6 +116,13 @@ async function isMember(userId, chatId) {
 }
 
 app.get("/api/health", (_, res) => res.json({ ok: true, service: "schat" }));
+
+app.get("/api/config", (_, res) => {
+  res.json({
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseAnonKey: process.env.SUPABASE_ANON_KEY
+  });
+});
 
 app.get("/api/me", auth, async (req, res) => {
   const { data, error } = await admin.from("profiles").select("*").eq("id", req.user.id).single();
