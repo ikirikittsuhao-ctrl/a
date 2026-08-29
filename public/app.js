@@ -27,32 +27,80 @@ async function api(url, options={}){
   return data;
 }
 
-/*
-  Supabase JS is intentionally loaded from the official CDN.
-  Set your Supabase project values below.
-*/
-const SUPABASE_URL=window.SCHAT_SUPABASE_URL||"https://wnrzdqskqgepiwawfnbr.supabase.co";
-const SUPABASE_ANON_KEY=window.SCHAT_SUPABASE_ANON_KEY||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducnpkcXNrcWdlcGl3YXdmbmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0Mzg4MzIsImV4cCI6MjEwMDAxNDgzMn0.hf7inGptEMeOZV1q4Ieo82DMDsC5JjcCy72I98w7-OE";
-
 async function init(){
-  if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
-    showAuth("public/index.html の設定値にSupabase URL/Anon Keyを設定してください。");
-    return;
-  }
-  const script=document.createElement("script");
-  script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-  script.onload=async()=>{
-    supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-    const {data}=await supabaseClient.auth.getSession();
-    session=data.session;
-    if(session) await enter();
-    else showAuth();
-    supabaseClient.auth.onAuthStateChange(async(_,s)=>{
-      session=s;
-      if(s) await enter(); else showAuth();
+  try{
+    const health=await fetch("/api/health");
+
+    if(!health.ok){
+      throw new Error("Server unavailable");
+    }
+
+    const configResponse=await fetch("/api/config",{
+      headers:{
+        "Accept":"application/json"
+      }
     });
-  };
-  document.head.appendChild(script);
+
+    if(!configResponse.ok){
+      throw new Error("Supabase設定を取得できませんでした");
+    }
+
+    const config=await configResponse.json();
+
+    const SUPABASE_URL=config.supabaseUrl;
+    const SUPABASE_ANON_KEY=config.supabaseAnonKey;
+
+    if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
+      showAuth("Supabase設定を確認してください");
+      return;
+    }
+
+    const script=document.createElement("script");
+    script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+    script.onload=async()=>{
+      try{
+        if(!window.supabase){
+          throw new Error("Supabase SDKの読み込みに失敗しました");
+        }
+
+        supabaseClient=window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_ANON_KEY
+        );
+
+        const {data,error}=await supabaseClient.auth.getSession();
+
+        if(error){
+          throw error;
+        }
+
+        session=data.session;
+
+        if(session) await enter();
+        else showAuth();
+
+        supabaseClient.auth.onAuthStateChange(async(_,s)=>{
+          session=s;
+          if(s) await enter();
+          else showAuth();
+        });
+      }catch(error){
+        console.error("Supabase initialization error:",error);
+        showAuth("Supabase設定を確認してください");
+      }
+    };
+
+    script.onerror=()=>{
+      console.error("Failed to load Supabase SDK");
+      showAuth("Supabase SDKの読み込みに失敗しました");
+    };
+
+    document.head.appendChild(script);
+  }catch(error){
+    console.error("Initialization error:",error);
+    showAuth("Supabase設定を確認してください");
+  }
 }
 
 async function enter(){
