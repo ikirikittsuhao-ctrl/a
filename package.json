@@ -1,10 +1,16 @@
+```json
 {
   "name": "schat",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node server/index.js", "dev": "node --watch server/index.js" },
-  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
     "compression": "^1.8.1",
@@ -18,3 +24,4 @@
     "socket.io": "^4.8.1"
   }
 }
+```
